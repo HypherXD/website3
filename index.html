@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoPulse | Immersive Luxury Watches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        [x-cloak] { display: none !important; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-card:hover .product-img { transform: scale(1.05); }
+        .product-img { transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
+</head>
+<body class="bg-[#050608] text-gray-100 selection:bg-indigo-500/30" x-data="store()">
+
+    <nav class="fixed top-0 w-full z-50 bg-[#050608]/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="text-2xl font-bold tracking-tighter italic">CHRONOPULSE</div>
+            <div class="hidden md:flex space-x-8 text-sm uppercase tracking-widest text-gray-400 font-medium">
+                <a href="#" class="hover:text-white transition-colors duration-300">Collections</a>
+                <a href="#" class="hover:text-white transition-colors duration-300">Journal</a>
+                <a href="#" class="hover:text-white transition-colors duration-300">Services</a>
+            </div>
+            <button @click="cartOpen = true" class="relative group p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:text-indigo-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span x-show="cart.length > 0" x-text="cart.length" class="absolute -top-1 -right-1 bg-indigo-500 text-[10px] w-4 h-4 flex items-center justify-center rounded-full"></span>
+            </button>
+        </div>
+    </nav>
+
+    <header class="relative h-[85vh] flex items-center overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,_rgba(79,70,229,0.15),_transparent_50%)]"></div>
+        <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200&auto=format&fit=crop" alt="Hero Watch" class="absolute right-0 top-0 h-full w-1/2 object-cover opacity-40 mix-blend-screen hidden lg:block">
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10 w-full">
+            <div class="max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                <span class="text-indigo-400 tracking-[0.3em] uppercase text-xs font-semibold mb-6 block">The Chronopulse Selection</span>
+                <h1 class="font-serif text-6xl md:text-8xl font-bold mb-8 leading-[0.9]">Timeless<br>Elegance.</h1>
+                <p class="text-gray-400 text-lg mb-10 max-w-md leading-relaxed">Discover our curated collection of heritage and modern timepieces, meticulously inspected for excellence.</p>
+                <button class="bg-white text-black px-10 py-4 rounded-full font-medium hover:bg-gray-200 transition-all hover:scale-105 active:scale-95">
+                    Explore Collection
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-24">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div>
+                <h2 class="text-4xl font-serif mb-2">Latest Arrivals</h2>
+                <p class="text-gray-500">Hand-picked timepieces for the discerning collector.</p>
+            </div>
+            
+            <div class="flex gap-2 flex-wrap">
+                <template x-for="brand in ['All', 'Rolex', 'Omega', 'Hublot', 'TAG Heuer']">
+                    <button @click="selectedBrand = brand" 
+                            :class="selectedBrand === brand ? 'bg-white text-black' : 'border border-white/10 hover:border-white/30 text-gray-400'"
+                            class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300">
+                        <span x-text="brand"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <template x-for="product in filteredProducts" :key="product.id">
+                <div @click="selectedProduct = product; detailsOpen = true" class="group cursor-pointer product-card">
+                    <div class="glass-panel rounded-3xl p-4 mb-4 overflow-hidden relative">
+                        <div class="h-64 overflow-hidden rounded-2xl">
+                            <img :src="product.image" 
+                                 :alt="product.name" 
+                                 onerror="this.src='https://placehold.co/600x600/1e293b/ffffff?text=Watch'" 
+                                 class="w-full h-full object-cover product-img">
+                        </div>
+                        <div class="absolute top-8 left-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="bg-black/40 backdrop-blur text-white text-xs px-3 py-1 rounded-full border border-white/10" x-text="product.brand"></span>
+                        </div>
+                    </div>
+                    <div class="px-2">
+                        <h4 class="text-lg font-semibold" x-text="product.name"></h4>
+                        <p class="text-indigo-400" x-text="'$' + product.price.toLocaleString()"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <div x-show="detailsOpen" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div @click="detailsOpen = false" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="glass-panel max-w-3xl w-full rounded-3xl p-8 md:p-12 relative animate-in zoom-in-95 duration-300" x-show="detailsOpen">
+            <button @click="detailsOpen = false" class="absolute top-6 right-6 text-gray-400 hover:text-white">✕</button>
+            <div class="grid md:grid-cols-2 gap-12">
+                <img :src="selectedProduct?.image" 
+                     onerror="this.src='https://placehold.co/600x600/1e293b/ffffff?text=Watch'" 
+                     class="w-full h-80 object-cover rounded-2xl">
+                <div>
+                    <span class="text-indigo-400 text-sm font-medium" x-text="selectedProduct?.brand"></span>
+                    <h2 class="text-3xl font-serif mt-2 mb-6" x-text="selectedProduct?.name"></h2>
+                    <p class="text-gray-400 mb-8 leading-relaxed" x-text="selectedProduct?.description"></p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold" x-text="'$' + selectedProduct?.price.toLocaleString()"></span>
+                        <button @click="addToCart(selectedProduct); detailsOpen = false" class="bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-200">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[70] flex justify-end">
+        <div @click="cartOpen = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="w-full md:w-[400px] bg-[#0b0e14] h-full shadow-2xl p-8 transform transition-transform duration-500" x-show="cartOpen" x-transition:enter="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="translate-x-0" x-transition:leave-end="translate-x-full">
+            <div class="flex justify-between items-center mb-10">
+                <h3 class="text-2xl font-serif">Shopping Bag</h3>
+                <button @click="cartOpen = false" class="text-gray-400">Close</button>
+            </div>
+            <div class="space-y-6">
+                <template x-for="(item, index) in cart" :key="index">
+                    <div class="flex gap-4 items-center">
+                        <img :src="item.image" 
+                             onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=W'" 
+                             class="w-16 h-16 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <p class="font-semibold" x-text="item.name"></p>
+                            <p class="text-sm text-gray-400" x-text="'$' + item.price.toLocaleString()"></p>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="cart.length === 0" class="text-gray-500 text-center py-20">Your bag is empty.</div>
+            </div>
+            <div class="absolute bottom-8 left-8 right-8 border-t border-white/10 pt-6">
+                <div class="flex justify-between text-lg font-bold mb-6">
+                    <span>Total</span>
+                    <span x-text="'$' + cartTotal.toLocaleString()"></span>
+                </div>
+                <button class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function store() {
+            return {
+                cartOpen: false,
+                detailsOpen: false,
+                selectedBrand: 'All',
+                selectedProduct: null,
+                cart: [],
+                products: [
+                    { id: 1, brand: 'Rolex', name: 'Classic Submariner', price: 8900, description: 'A timeless icon of horology. The Submariner is water-resistant to 300 meters, featuring a unidirectional rotatable bezel and luminous display.', image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=600' },
+                    { id: 2, brand: 'Omega', name: 'Speedmaster Moon', price: 6500, description: 'The legendary timepiece worn on the moon. A masterclass in chronography with tachymetric scale.', image: 'https://images.unsplash.com/photo-1623998012613-25a4d2572522?q=80&w=600' },
+                    { id: 3, brand: 'Hublot', name: 'Big Bang Steel', price: 15500, description: 'A fusion of unconventional materials and classic watchmaking. Bold, contemporary, and unmistakable.', image: 'https://images.unsplash.com/photo-1587836374828-4dbafa94f0e3?q=80&w=600' },
+                    { id: 4, brand: 'Rolex', name: 'Datejust 41', price: 12000, description: 'The modern archetype of the classic watch. Precise, reliable, and versatile.', image: 'https://images.unsplash.com/photo-1507034589631-9433cc6bc453?q=80&w=600' },
+                    { id: 5, brand: 'TAG Heuer', name: 'Carrera Chrono', price: 5500, description: 'Designed for high-speed professional driving, this chronograph is a celebration of precision.', image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b92ad?q=80&w=600' },
+                    { id: 6, brand: 'Omega', name: 'Seamaster Diver', price: 5800, description: 'An elegant professional diver watch with 300m resistance and a distinct ceramic bezel.', image: 'https://images.unsplash.com/photo-1588699095648-39fbc41d2dfd?q=80&w=600' },
+                    { id: 7, brand: 'Rolex', name: 'Day-Date Platinum', price: 34500, description: 'The ultimate watch of prestige. Crafted from pure platinum, it is a statement of true distinction.', image: 'https://images.unsplash.com/photo-1613917675406-8d655f46256f?q=80&w=600' },
+                    { id: 8, brand: 'Hublot', name: 'Classic Fusion', price: 9200, description: 'Elegance redefined. A thinner profile that retains the spirit of Hublot in a more formal package.', image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=600' }
+                ],
+                get filteredProducts() {
+                    return this.selectedBrand === 'All' ? this.products : this.products.filter(p => p.brand === this.selectedBrand);
+                },
+                addToCart(product) {
+                    this.cart.push(product);
+                },
+                get cartTotal() {
+                    return this.cart.reduce((sum, item) => sum + item.price, 0);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
